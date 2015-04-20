@@ -36,3 +36,12 @@ func init() {
 	DB.DB().SetMaxIdleConns(10)
 	DB.DB().SetMaxOpenConns(100)
 }
+
+func WithRollback(f func(db *gorm.DB) error) error {
+	tx := DB.Begin()
+	defer func() {
+		tx.Rollback()
+		tx.Close()
+	}()
+	return f(tx)
+}
