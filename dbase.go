@@ -9,12 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-var (
-	mysqlAccounts string
-	mysqlServices string
-)
-
-var DB gorm.DB
+var Default *gorm.DB
 
 func init() {
 	dialect := os.Getenv("DATABASE_DRIVER")
@@ -27,21 +22,21 @@ func init() {
 		log.Fatalln("DATABASE_URL not set!")
 	}
 
-	var err error
-	DB, err = gorm.Open(dialect, open)
+	db, err := gorm.Open(dialect, open)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	DB.DB().SetMaxIdleConns(10)
-	DB.DB().SetMaxOpenConns(100)
+	Default = &db
+
+	Default.DB().SetMaxIdleConns(10)
+	Default.DB().SetMaxOpenConns(100)
 }
 
 func WithRollback(f func(db *gorm.DB) error) error {
-	tx := DB.Begin()
+	tx := Default.Begin()
 	defer func() {
 		tx.Rollback()
-		tx.Close()
 	}()
 	return f(tx)
 }
