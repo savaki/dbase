@@ -19,12 +19,14 @@ func init() {
 
 	open := os.Getenv("DATABASE_URL")
 	if open == "" {
-		log.Fatalln("DATABASE_URL not set!")
+		log.Println("DATABASE_URL not set!")
+		return
 	}
 
 	db, err := gorm.Open(dialect, open)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Println(err.Error())
+		return
 	}
 
 	Default = &db
